@@ -1,0 +1,24 @@
+<div class="admin-dashboard">
+    <h2>Consultant List</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prenom</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let consultant of consultants">
+          <td>{{ consultant.nom }}</td>
+          <td>{{ consultant.prenom }}</td>
+          <td>{{ consultant.email }}</td>
+          <td>
+            <button (click)="viewConsultantDetails(consultant.id)">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

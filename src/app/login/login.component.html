@@ -1,0 +1,31 @@
+<div class="login-container">
+    <div class="logo">
+      <img src="assets/logo.jpg" alt="Logo">
+    </div>
+  
+    <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
+      <div class="form-step">
+        
+          <div class="form-box">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" ngModel required placeholder="Saisissez votre email">
+          </div>
+          <div class="form-box">
+            <label for="password">Mot de passe:</label>
+            <input type="password" id="password" name="password" ngModel required placeholder="Saisissez votre mot de passe">
+          </div>
+        
+        <div class="form-actions">
+          <button type="submit">Se Connecter</button>
+        </div>
+      </div>
+    </form>
+    <div class="signup-redirect">
+        <p>Pas encore inscrit ? <a (click)="goToSignup()">S'inscrire</a></p>
+      </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  

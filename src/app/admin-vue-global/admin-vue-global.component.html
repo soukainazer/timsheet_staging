@@ -1,0 +1,12 @@
+<div class="timesheets-container">
+    <h2>Consultants' Timesheets</h2>
+    <ag-grid-angular
+      style="width: 100%; height: 600px;"
+      class="ag-theme-alpine"
+      [rowData]="timesheets"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [pagination]="false"
+      [paginationPageSize]="10">
+    </ag-grid-angular>
+  </div>

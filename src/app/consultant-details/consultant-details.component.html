@@ -1,0 +1,78 @@
+<div class="consultant-details">
+  <h1>Consultant Details</h1>
+
+  <div class="details-container">
+   
+    <div class="info-section" *ngIf="consultant">
+      <div class="detail-item">
+        <label>ID:</label>
+        <span>{{ consultant.id }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Nom:</label>
+        <span>{{ consultant.nom }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Prenom:</label>
+        <span>{{ consultant.prenom }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Email:</label>
+        <span>{{ consultant.email }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Nationalite:</label>
+        <span>{{ consultant.nationalite }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Adresse:</label>
+        <span>{{ consultant.adresse }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Date Naissance:</label>
+        <span>{{ consultant.dateNaissance }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Situation Familiale:</label>
+        <span>{{ consultant.situationFamiliale }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Service:</label>
+        <span>{{ consultant.service }}</span>
+      </div>
+
+      <div class="detail-item">
+        <label>Fonction:</label>
+        <span>{{ consultant.fonction }}</span>
+      </div>
+      <div class="detail-item" *ngIf="consultant.idErp">
+        <label>ID ERP:</label>
+        <span>{{ consultant.idErp }}</span>
+      </div>
+
+    </div>
+
+   
+    <div class="dropdown-section" *ngIf="!consultant.idErp">
+      <label for="consultantDropdown" class="dropdown-label">Select un Consultant depuis l'ERP::</label>
+      <select id="consultantDropdown" (change)="onConsultantChange($event)">
+        <option value="" disabled selected>Sélectionnez</option>
+        <option *ngFor="let consultant of consultantErp" [value]="consultant.id">
+          {{ consultant.label }}
+        </option>
+      </select>
+      <div class="button-group">
+        <button (click)="updateIdErp()">Soumettre</button>
+        <button (click)="goBack()">Retour</button>
+      </div>
+    </div>
+  </div>
+</div>

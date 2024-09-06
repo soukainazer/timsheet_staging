@@ -1,0 +1,63 @@
+.timesheet-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .timesheet-header {
+    margin-bottom: 20px;
+  }
+  
+  .timesheet-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .timesheet-header p {
+    margin: 5px 0;
+    color: #666;
+  }
+  
+  .timesheet-table {
+    overflow-x: auto;
+  }
+  
+  .timesheet-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+  
+  .timesheet-table th, .timesheet-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .timesheet-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+  }
+  
+  .timesheet-table td {
+    color: #555;
+  }
+  
+  .date-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .chip {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #e0e0e0;
+    border-radius: 16px;
+    font-size: 14px;
+    color: #333;
+  }
+  

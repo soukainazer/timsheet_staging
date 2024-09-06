@@ -1,0 +1,145 @@
+<div class="signup-container">
+    <div class="logo">
+      <img src="assets/logo.jpg" alt="Logo">
+    </div>
+  
+    <form (ngSubmit)="onSubmit(signupForm)" #signupForm="ngForm">
+      
+      <div *ngIf="step === 1" class="form-step">
+        <div class="form-row">
+          <div class="form-box">
+            <label for="nom">Nom:</label>
+            <input type="text" id="nom" name="nom" [(ngModel)]="formData.nom" required placeholder="Saisissez votre nom" #nom="ngModel">
+            <div *ngIf="nom.invalid && (nom.dirty || nom.touched)" class="error-message">
+              Nom is required.
+            </div>
+          </div>
+          <div class="form-box">
+            <label for="prenom">Prénom:</label>
+            <input type="text" id="prenom" name="prenom" [(ngModel)]="formData.prenom" required placeholder="Saisissez votre prénom" #prenom="ngModel">
+            <div *ngIf="prenom.invalid && (prenom.dirty || prenom.touched)" class="error-message">
+              Prénom is required.
+            </div>
+          </div>
+        </div>
+        <div class="form-box">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" [(ngModel)]="formData.email" required placeholder="Saisissez votre email" #email="ngModel">
+          <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
+            Valid email is required.
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-box">
+            <label for="motDePasse">Mot de passe:</label>
+            <input type="password" id="motDePasse" name="motDePasse" [(ngModel)]="formData.motDePasse" required minlength="6" maxlength="20"   placeholder="Saisissez votre mot de passe" #password="ngModel">
+            <div *ngIf="password.invalid && (password.dirty || password.touched)" class="error-message">
+                <small *ngIf="password.errors?.['required']">Password is required.</small>
+                <small *ngIf="password.errors?.['minlength']">Password must be at least 6 characters long.</small>
+                <small *ngIf="password.errors?.['maxlength']">Password cannot exceed 20 characters.</small>
+
+            </div>
+          </div>
+          <div class="form-box">
+            <label for="confirmPassword">Confirmer le mot de passe:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" [(ngModel)]="formData.confirmPassword" required placeholder="Confirmez votre mot de passe" #confirmPassword="ngModel">
+            <div *ngIf="confirmPassword.invalid && (confirmPassword.dirty || confirmPassword.touched)" class="error-message">
+              Confirmation is required.
+            </div>
+            <div *ngIf="password.value !== confirmPassword.value && confirmPassword.dirty" class="error-message">
+              Passwords do not match.
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" (click)="next()" [disabled]="signupForm.invalid">Suivant</button>
+        </div>
+      </div>
+  
+      <!-- step2 -->
+      <div *ngIf="step === 2" class="form-step">
+        <div class="form-row">
+          <div class="form-box">
+            <label for="nationalite">Nationalité:</label>
+            <select id="nationalite"name="nationalite" [(ngModel)]="formData.nationalite" required #nationalite="ngModel">
+                <option value="marocain(e)">Marocain(e)</option>
+                <option value="français(e)">Français(e)</option>
+                <option value="tinisian">Tunisian</option>
+                <option value="egyptian">Egyptian</option>
+              </select>            
+              <div *ngIf="nationalite.invalid && (nationalite.dirty || nationalite.touched)" class="error-message">
+              Nationalité is required.
+            </div>
+          </div>
+          <div class="form-box">
+            <label for="dateNaissance">Date de Naissance:</label>
+            <input type="date" id="dateNaissance" name="dateNaissance" [(ngModel)]="formData.dateNaissance" required #dateNaissance="ngModel">
+            <div *ngIf="dateNaissance.invalid && (dateNaissance.dirty || dateNaissance.touched)" class="error-message">
+              Date de Naissance is required.
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-box">
+            <label for="sexe">Sexe:</label>
+            <select id="sexe" name="sexe" [(ngModel)]="formData.sexe" required #sexe="ngModel">
+              <option value="masculin">Masculin</option>
+              <option value="feminin">Féminin</option>
+            </select>
+            <div *ngIf="sexe.invalid && (sexe.dirty || sexe.touched)" class="error-message">
+              Sexe is required.
+            </div>
+          </div>
+          <div class="form-box">
+            <label for="situationFamiliale">Situation Familiale:</label>
+            <input type="text" id="situationFamiliale" name="situationFamiliale" [(ngModel)]="formData.situationFamiliale" required placeholder="Saisissez votre situation familiale" #situationFamiliale="ngModel">
+            <div *ngIf="situationFamiliale.invalid && (situationFamiliale.dirty || situationFamiliale.touched)" class="error-message">
+              Situation Familiale is required.
+            </div>
+          </div>
+        </div>
+        <div class="form-box">
+          <label for="lieuResidence">Lieu de Résidence:</label>
+          <input type="text" id="lieuResidence" name="lieuResidence" [(ngModel)]="formData.lieuResidence" required placeholder="Saisissez votre lieu de résidence" #lieuResidence="ngModel">
+          <div *ngIf="lieuResidence.invalid && (lieuResidence.dirty || lieuResidence.touched)" class="error-message">
+            Lieu de Résidence is required.
+          </div>
+        </div>
+        <div class="form-box">
+          <label for="adresse">Adresse:</label>
+          <input type="text" id="adresse" name="adresse" [(ngModel)]="formData.adresse" required placeholder="Saisissez votre adresse" #adresse="ngModel">
+          <div *ngIf="adresse.invalid && (adresse.dirty || adresse.touched)" class="error-message">
+            Adresse is required.
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-box">
+            <label for="service">Service:</label>
+            <input type="text" id="service" name="service" [(ngModel)]="formData.service" required placeholder="Saisissez votre service" #service="ngModel">
+            <div *ngIf="service.invalid && (service.dirty || service.touched)" class="error-message">
+              Service is required.
+            </div>
+          </div>
+          <div class="form-box">
+            <label for="fonction">Fonction:</label>
+            <input type="text" id="fonction" name="fonction" [(ngModel)]="formData.fonction" required placeholder="Saisissez votre fonction" #fonction="ngModel">
+            <div *ngIf="fonction.invalid && (fonction.dirty || fonction.touched)" class="error-message">
+              Fonction is required.
+            </div>
+          </div>
+        </div>
+        <div class="form-box">
+          <label for="coordonnees">Coordonnées:</label>
+          <input type="text" id="coordonnees" name="coordonnees" [(ngModel)]="formData.coordonnees" required placeholder="Saisissez vos coordonnées" #coordonnees="ngModel">
+          <div *ngIf="coordonnees.invalid && (coordonnees.dirty || coordonnees.touched)" class="error-message">
+            Coordonnées is required.
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" (click)="previous()">Retour</button>
+          <button type="submit" [disabled]="signupForm.invalid">Soumettre</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  

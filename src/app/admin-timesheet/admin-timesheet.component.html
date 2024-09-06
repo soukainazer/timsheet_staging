@@ -1,0 +1,42 @@
+<div class="timesheet-container">
+  <div class="timesheet-header">
+    <h2>Feuillle de temps pour le consultant : {{ consultant.nom }} {{ consultant.prenom }}</h2>
+    <p>Date : {{ timesheet.year }} / {{ timesheet.month }}</p>
+    <p><strong>Total des jours travaillés :</strong> {{ timesheet.totalJoursT }}</p>
+
+    <div *ngIf="timesheet.pieceJointe">
+      <p><strong>Pièce Jointe :</strong></p>
+      <a [href]="downloadUrl" target="_blank">Télécharger le fichier</a>
+    </div>
+  </div>
+
+  
+
+  <div class="timesheet-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Bon de Commande ID</th>
+          <th>Référence</th>
+          <th>Date de Commande</th>
+          <th>Jours travaillées</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of getGroupedWorkedDays()">
+          <td>{{ entry.bonDeCommandeId }}</td>
+          <td>{{ bonDeCommandeDetailsMap[entry.bonDeCommandeId]?.order_ref || 'Chargement...' }}</td>
+          <td>{{ bonDeCommandeDetailsMap[entry.bonDeCommandeId]?.date_commande || 'Chargement...' }}</td>
+          <td>{{ entry.totalDuration }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="validateTimesheet(entry.bonDeCommandeId,consultant.idErp,timesheet.totalJoursT)">validate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+

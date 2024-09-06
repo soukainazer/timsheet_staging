@@ -1,0 +1,27 @@
+<body>
+<div>
+  <div class="table-title">FEUILLE DE TEMPS {{ currentYear }} </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        
+        <th>Timesheet</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let month of months">
+        <td>{{ month.date }}</td>
+        
+        <td>
+          <button *ngIf="month.showButton"
+                  class="btn-green"
+                  (click)="goToTimesheet(month.date)">
+            <i class="fa fa-clock"></i> 
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</body>

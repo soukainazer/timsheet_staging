@@ -1,0 +1,57 @@
+body {
+  margin: 0; /* Reset default margin */
+  padding-left: 100px; /* Add padding to the left to make space for the sidebar */
+  padding-top: 60px; /* Add padding to the top to account for the header */
+  font-family: 'Poppins', sans-serif;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 50px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+    font-size: 14px;
+    height: 50px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .table-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    
+    color: #333;
+  }
+  
+  button {
+    background-color:transparent;
+    color: #28a745; 
+    border: none;
+    padding: 0; 
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 25px; 
+  }
+  button:disabled {
+    background-color: #66c57b;
+    cursor: not-allowed;
+  }
+  
+  button:hover .fa-clock {
+    color: #30bd4a; 
+  }
+  
+  .fa-clock {
+    margin-right: 5px;
+    color: #2ca348;
+  }
+  
+  
