@@ -9,6 +9,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -67,7 +69,7 @@ import { WaitingPageComponent } from './waiting-page/waiting-page.component';
     MatTableModule,
     MatChipsModule,
     BrowserAnimationsModule,
-
+    MatSnackBarModule
   ],
   providers: [
     provideClientHydration(),

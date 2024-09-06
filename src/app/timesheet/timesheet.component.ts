@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DolibarService } from '../DataService/dolibar.service';
 import { ErrorHandlerService } from '../error-handler.service';
 import { __param } from 'tslib';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
  interface FeuilleDeTemps {
   id: number;
@@ -61,6 +62,7 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
     private dolibarService: DolibarService,
     private errorHandler: ErrorHandlerService,
     private router : Router,
+    private snackBar: MatSnackBar
   ) {
   
 
@@ -98,11 +100,11 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
       this.month = params.get('month') ? parseInt(params.get('month')!, 10) : null;
 
       if (this.consultantId && this.year && this.month) {
-        this.getBonDeCommande();
-        this.initializeGrid();
+        // this.getBonDeCommande();
+        // this.initializeGrid();
 
         // this.loadFeuilleDeTemps();
-        // this.initializeGrid();
+        this.initializeGrid();
       
         // this.loadFeuilleDeTempsData();
         
@@ -127,13 +129,15 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
         // { headerName: 'Number of Days', field: 'nomber_of_days' },
         { headerName: 'Days Consumed', field: 'nomber_de_jour_consumes', pinned: 'left' },
         { headerName: 'Days Remaining', field: 'nombre_de_jour_restants' , pinned: 'left'},
+       
         ...this.generateDayColumns(),
         { headerName: 'Total', field: 'total', valueGetter: this.calculateRowTotal.bind(this) }
       ];
-
-       this.loadFeuilleDeTemps();
+      console.log('before load')
+      this.getBonDeCommande();
+      //  this.loadFeuilleDeTemps();
       
-    
+       
       
     }
   }
@@ -164,9 +168,11 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
      
       if(response.success){
         this.bonsDeCommande = response.data;
+      
 
       console.log('Orders by id data', this.bonsDeCommande);
-      this.updateGridWithBCs();
+      // this.updateGridWithBCs();
+      this.loadFeuilleDeTemps();
       } else{
         console.log('Failed to fetch orders');
       }
@@ -179,17 +185,17 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
   }
 
 
-  updateGridWithBCs(): void {
-    this.rowData = this.bonsDeCommande.map(bc => ({
-      ...bc,
-      ...this.createEmptyRowData()
-    }));
+  // updateGridWithBCs(): void {
+  //   this.rowData = this.bonsDeCommande.map(bc => ({
+  //     ...bc,
+  //     ...this.createEmptyRowData()
+  //   }));
     
-    if (this.gridApi) {
-      this.gridApi.applyTransaction({ add: this.rowData });
-      this.calculateTotalDays(); 
-    }
-  }
+  //   if (this.gridApi) {
+  //     this.gridApi.applyTransaction({ add: this.rowData });
+  //     this.calculateTotalDays(); 
+  //   }
+  // }
 
   createDaysColumnsData(): any {
     const daysInMonth = new Date(this.year!, this.month!, 0).getDate();
@@ -309,11 +315,15 @@ onSubmitTimesheet(): void {
     console.log('workedDays',this.extractWorkedDays);
    
 
-
+    if (workedDays.length === 0) {
+      console.error('Worked days cannot be empty.');
+      return;
+    }
     
     this.feuilleDeTempsService.addBulkTimesheet(+this.consultantId, +year, +month, workedDays,this.base64File)
       .subscribe(() => {
         console.log('Timesheet successfully updated.');
+        this.showSuccessMessage('La Feuille de Temps successfully updated.')
         console.log('File' , this.selectedFile);
         this.router.navigate(['vue-globale']);
       }, error => {
@@ -325,29 +335,6 @@ onSubmitTimesheet(): void {
 }
 
 
-// onSubmitTimesheet(): void {
-//   if (this.consultantId && this.year !== null && this.month !== null) {
-
-//     const year = Number(this.year);
-//     const month = Number(this.month)  ;
-//     const workedDays= this.extractWorkedDays();
-
-//     console.log('workedDays',this.extractWorkedDays);
-   
-
-
-    
-//     this.feuilleDeTempsService.addBulkTimesheet(+this.consultantId, +year, +month, workedDays)
-//       .subscribe(() => {
-//         console.log('Timesheet successfully updated.');
-//         this.router.navigate(['vue-globale']);
-//       }, error => {
-//         console.error('Error updating timesheet:', error);
-//       });
-//   } else {
-//     console.error('Consultant ID, year, or month is not available.');
-//   }
-// }
 
 extractWorkedDays(): any[] {
   const workedDaysArray: any[] = [];
@@ -376,32 +363,79 @@ extractWorkedDays(): any[] {
 
 
 
-  loadFeuilleDeTemps(): void {
-    if (this.consultantId && this.year !== null && this.month !== null) {
-      this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month).subscribe(
-        data => {
-          console.log('Loaded timesheet data:', data);
-          // this.initializeGrid();
-          if (data.bonsDeCommande) {
-            this.bonsDeCommande = data.bonsDeCommande;
-            this.rowData = data.bonsDeCommande.map((bc:any) => ({
-              bcId: bc.order_ref ,
-              ...this.createEmptyRowData() 
-            }));
-            this.gridApi.applyTransaction({ add: this.rowData });
+  // loadFeuilleDeTemps(): void {
+    
+  //   if (this.consultantId && this.year !== null && this.month !== null) {
+  //     this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month).subscribe(
+  //       data => {
+  //         console.log('Loaded timesheet data:', data);
+  //         // this.initializeGrid();
+  //         // this.getBonDeCommande();
+  //         if (data.bonsDeCommande) {
+  //           this.bonsDeCommande = data.bonsDeCommande;
+  //           this.rowData = data.bonsDeCommande.map((bc:any) => ({
+  //             bcId: bc.order_ref ,
+  //             ...this.createEmptyRowData() 
+  //           }));
+  //           this.gridApi.applyTransaction({ add: this.rowData });
 
-          } else {
-            console.warn('bonsDeCommande property is missing in the response');
+  //         } else {
+  //           console.warn('bonsDeCommande property is missing in the response');
+  //         }
+  //         this.totalDaysWorked = data.totalJoursT || 0;
+  //         this.bonsDeCommande = data.bonsDeCommande || [];
+  //       },
+  //       error => {
+  //         console.error('Error loading timesheet:', error);
+  //       }
+  //     );
+  //   }
+  // }
+
+  loadFeuilleDeTemps(): void {
+    if (this.consultantId && this.year && this.month) {
+      this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month)
+        .subscribe(
+          (response: any) => {
+            console.log('timesheet',response);
+            this.rowData = this.bonsDeCommande.map(bc => ({
+              ...bc,
+              ...this.createDaysColumnsData()  
+            }));
+            if (response.jourtravaille && response.jourtravaille.length > 0) {
+            response.jourtravaille.forEach((workedDayEntry:any) => {
+              workedDayEntry.workedDays.forEach((workedDay:any) => {
+
+                const bcId = workedDay.bonDeCommandeId;
+                const date = new Date(workedDay.date);
+                const dayNumber = date.getDate();
+                const duration = workedDay.duration;
+                
+                console.log('rowdata',this.rowData);
+                const matchingRow = this.rowData.find(row => row.order_id === bcId.toString(),);
+                
+                
+  
+          
+            if (matchingRow) {
+              matchingRow[`day${dayNumber}`] = duration;
+            }
+          });
+        });
+      }
+  
+            if (this.gridApi) {
+              this.gridApi.applyTransaction({ add: this.rowData });  
+            }
+            this.calculateTotalDays();
+          },
+          error => {
+            this.errorHandler.handleError(error);
           }
-          this.totalDaysWorked = data.totalJoursT || 0;
-          this.bonsDeCommande = data.bonsDeCommande || [];
-        },
-        error => {
-          console.error('Error loading timesheet:', error);
-        }
-      );
+        );
     }
   }
+  
 
 
 
@@ -431,7 +465,12 @@ extractWorkedDays(): any[] {
   }
   
 
-
+  showSuccessMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,  
+      verticalPosition: 'top',  
+      horizontalPosition: 'center'  
+    });}
   
 }
 

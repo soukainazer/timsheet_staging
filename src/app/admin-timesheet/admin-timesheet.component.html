@@ -21,6 +21,7 @@
           <th>Date de Commande</th>
           <th>Jours travaillées</th>
           <th>Action</th>
+          
         </tr>
       </thead>
       <tbody>
@@ -30,13 +31,26 @@
           <td>{{ bonDeCommandeDetailsMap[entry.bonDeCommandeId]?.date_commande || 'Chargement...' }}</td>
           <td>{{ entry.totalDuration }}</td>
           <td>
-            <button class="btn btn-primary" (click)="validateTimesheet(entry.bonDeCommandeId,consultant.idErp,timesheet.totalJoursT)">validate</button>
+            <button class="btn btn-primary"  
+             [disabled]="timesheet.statut === 'valider'"
+              (click)="validateTimesheet(entry.bonDeCommandeId,consultant.idErp,entry.totalDuration)">validate</button>
+              <button class="btn btn-danger"  
+              [disabled]="timesheet.statut === 'valider'"
+              (click)="openRejectionModal(entry.bonDeCommandeId)">Reject</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+
+
+<div *ngIf="showRejectionModal" class="modal">
+  <div class="modal-content">
+    <span class="close" (click)="closeRejectionModal()">&times;</span>
+    <h2>Reject Timesheet</h2>
+    <textarea [(ngModel)]="rejectionReason" placeholder="Enter reason for rejection"></textarea>
+    <button class="btn btn-danger" (click)="rejectTimesheet(timesheet.id, rejectionReason)">Submit</button>
+  </div>
 </div>
-
-
+</div>
 

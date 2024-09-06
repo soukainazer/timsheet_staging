@@ -15,10 +15,15 @@
         
         <td>
           <button *ngIf="month.showButton"
-                  class="btn-green"
+                  [ngClass]="getButtonClass(month.statut)"
                   (click)="goToTimesheet(month.date)">
-            <i class="fa fa-clock"></i> 
+                  <i class="fa fa-clock"></i> 
           </button>
+          <!-- <button *ngIf="month.showButton"
+          [ngClass]="getButtonClass(month.statut)"
+          (click)="goToTimesheet(month.date)">
+    <i class="fa fa-clock"></i>
+  </button> -->
         </td>
       </tr>
     </tbody>

@@ -51,7 +51,9 @@ export class FeuilleDeTempsService {
     return this.http.post<void>(`${this.apiUrl}/add`, formData);
   }
 
-  
+  updateTimesheet(consultantId: number, year: number, month: number, timesheet:any[]){
+    return this.http.put<void>(`${this.apiUrl}/update`, timesheet);
+  }
 
  
  
@@ -67,12 +69,12 @@ export class FeuilleDeTempsService {
     return this.http.get<any>(`${this.apiUrl}/admin/timesheet/${id}`);
   }
 
-  approveTimesheet(id: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/feuilledetemps/approve/${id}`, {});
+  validateTimesheet(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/valider`, {statut: 'valider'});
   }
 
-  rejectTimesheet(id: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/feuilledetemps/reject/${id}`, {});
+  rejectTimesheet(id: number, reason: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/rejeter`, {reason});
   }
 
 }

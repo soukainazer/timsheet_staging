@@ -33,7 +33,7 @@ table {
   
   button {
     background-color:transparent;
-    color: #28a745; 
+    transition: background-color 0.3s ease;
     border: none;
     padding: 0; 
     cursor: pointer;
@@ -44,9 +44,19 @@ table {
     background-color: #66c57b;
     cursor: not-allowed;
   }
+  .btn-green {
+    background-color: green;
+    color: white;
+  }
   
-  button:hover .fa-clock {
-    color: #30bd4a; 
+  .btn-yellow {
+    background-color: yellow;
+    color: black;
+  }
+  
+  .btn-red {
+    background-color: red;
+    color: white;
   }
   
   .fa-clock {

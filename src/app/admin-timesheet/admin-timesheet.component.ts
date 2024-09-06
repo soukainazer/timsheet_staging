@@ -8,6 +8,7 @@ import { DolibarService } from '../DataService/dolibar.service';
 import { error } from 'console';
 import { UserManagementService } from '../user-management.service';
 import { response } from 'express';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 interface WorkedDays {
@@ -58,6 +59,11 @@ export class AdminTimesheetComponent implements OnInit {
   orderId: number = 0;
   downloadUrl: string | null = null;
 
+  notifications: { [key: number]: string[] } = {};
+  showRejectionModal = false;
+  selectedBonDeCommandeId: number | null = null;
+  rejectionReason = '';
+
   displayedColumns: string[] = ['order_id', 'order_ref', 'date_commande', 'total_ht', 'dates_worked']; // Define the columns
 
   dataSource = new MatTableDataSource<BonDeCommande>([]);
@@ -66,7 +72,8 @@ export class AdminTimesheetComponent implements OnInit {
     private route: ActivatedRoute,
     private feuilleDeTempsService: FeuilleDeTempsService,
     private dolibarService: DolibarService,
-    private userManagementService: UserManagementService
+    private userManagementService: UserManagementService,
+    private snackBar: MatSnackBar
   ) { }
 
 
@@ -148,32 +155,6 @@ export class AdminTimesheetComponent implements OnInit {
     }));
   }
 
-  // getGroupedWorkedDays(): any[] {
-  //   if (!this.timesheet || !Array.isArray(this.timesheet.jourtravaille)) {
-  //     return [];
-  //   }
-  //   if (!this.bonDeCommandes || !Array.isArray(this.bonDeCommandes)) {
-  //     console.error('Bon de Commandes data is missing or invalid.');
-  //     return [];
-  //   }
-
-  //   const groupedDays: { [key: number]: string[] } = {};
-
-  //   this.timesheet.jourtravaille.forEach((entry: any) => {
-  //     entry.workedDays.forEach((day: any) => {
-  //       if (!groupedDays[day.bonDeCommandeId]) {
-  //         groupedDays[day.bonDeCommandeId] = [];
-  //       }
-  //       groupedDays[day.bonDeCommandeId].push(day.date);
-  //     });
-  //   });
-
-  //   return Object.keys(groupedDays).map(key => ({
-  //     bonDeCommandeId: +key,
-  //     dates: groupedDays[+key]
-  //   }));
-  // }
-
   fetchBonDeCommandeDetails(): void {
     const consultantId = this.timesheet?.consultantId;
 
@@ -219,28 +200,74 @@ export class AdminTimesheetComponent implements OnInit {
         this.bonDeCommandeDetailsMap[entry.bonDeCommandeId] = matchBC;
       }
     });
-    // this.dataSource.data = this.bonDeCommandes.map(bc => ({
-    //   ...bc,
-    //   totalDaysWorked: groupedDays.find(g => g.bonDeCommandeId === +bc.order_id)?.totalDaysWorked || 0
-    // }));
+    
   }
 
   validateTimesheet(orderId: number, productId: number, timesheetTotal: number) {
-    // const orderId= this.orderId;
-    // const productId= this.productId;
-    // const timesheetTotal= this.timesheetTotal;
-
+ 
+    const timesheetId = this.timesheet.id;
     console.log('body ', orderId,productId,timesheetTotal);
 
     this.dolibarService.incoiceTimesheet(orderId,Number (productId), timesheetTotal).subscribe((response : any)=>{
-      // console.log('valid');
-      // console.log('body ', orderId,productId,timesheetTotal);
+     this.showSuccessMessage('la Feuille de Temps a été Facturée avec Succès.');
       console.log('Facture created' , response);
     })
-      
-    
 
+    this.feuilleDeTempsService.validateTimesheet(timesheetId).subscribe(
+      (response:any) => {
+        this.showSuccessMessage('Feuille de temps validée avec succès.');
+        this.timesheet.statut = 'valider';
+      },
+      (error: any) => {
+        console.error('Error validating the timesheet:', error)
+      }
+    )
+   
   }
 
+  openRejectionModal(bonDeCommandeId: number) {
+    this.selectedBonDeCommandeId = bonDeCommandeId;
+    this.showRejectionModal = true;
+  }
+
+  closeRejectionModal() {
+    this.showRejectionModal = false;
+    this.rejectionReason = '';
+  }
+
+  rejectTimesheet(timesheetId: number, reason: string){
+
+    if (!reason) {
+      alert('Please provide a reason for rejection.');
+      return;
+    }
+
+  
+
+    this.feuilleDeTempsService.rejectTimesheet(timesheetId,reason).subscribe(
+      response=> {
+        this.addNotification(timesheetId, 'Feuille De Temps rejetée: ${reason}');
+        this.closeRejectionModal();
+      },
+      error => {
+        console.error('Error rejecting the timesheet', error);
+      }
+    )
+  }
+
+  addNotification(timesheetId: number, message: string) {
+    if (!this.notifications[timesheetId]) {
+      this.notifications[timesheetId] = [];
+    }
+    this.notifications[timesheetId].push(message);
+  }
+
+ 
+  showSuccessMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,  
+      verticalPosition: 'top',  
+      horizontalPosition: 'center'  
+    });}
 
 }

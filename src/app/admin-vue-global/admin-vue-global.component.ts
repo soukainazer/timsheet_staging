@@ -30,6 +30,7 @@ export class AdminVueGlobalComponent {
     { headerName: 'Consultant ', field: 'consultantName', sortable: true, filter: true },
     { headerName: 'Date', field: 'date', sortable: true, filter: true },
     { headerName: 'Total Jour Travaillés', field: 'totalJoursT', sortable: true, filter: true },
+    { headerName: 'Statut', field: 'statut', sortable: true, filter: true },
     {headerName: 'Actions', 
       cellRenderer: (params : ICellRendererParams) => {
         const button = document.createElement('button');
@@ -62,21 +63,28 @@ export class AdminVueGlobalComponent {
   loadTimesheets(): void {
     this.feuilleDeTempsService.getAllTimesheets().subscribe(
       (data: any[]) => {
+        console.log('Timesheets data:', data);
+        const filteredData = data.filter(timesheet => {
+          const workedDaysArray = timesheet.jourtravaille && timesheet.jourtravaille[0]?.workedDays;
+          console.log('workedDays:', workedDaysArray); 
+          return workedDaysArray && workedDaysArray.length > 0;
+        });        
         const consultantRequest = data.map(timesheet => 
           this.userManagementService.getConsultantById(timesheet.consultantId)
         );
 
         forkJoin(consultantRequest).subscribe(consultants =>{
-          const newTimesheets = data.map((timesheet, index)=>({
+          const newTimesheets = filteredData.map((timesheet, index)=>({
             ...timesheet,
           
             consultantName:` ${consultants[index]?.nom} ${consultants[index]?.prenom}`,
-            date: `${timesheet.year} / ${timesheet.month}`
+            date: `${timesheet.year} / ${timesheet.month}`,
+            statut: `${timesheet.statut}`
 
           })
           
           )
-          this.timesheets = [...newTimesheets, ...this.timesheets];
+          this.timesheets = [...newTimesheets];
 
           if (this.gridApi) {
             this.gridApi.setRowData(this.timesheets);
