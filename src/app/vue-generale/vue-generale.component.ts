@@ -50,7 +50,7 @@ export class VueGeneraleComponent implements OnInit {
       const date = `${month}`;
       const year = this.currentYear.toString();
      
-      this.feuilleDeTempsService.getTimeSheet(consultantIdNumber, +month, +year).subscribe(
+      this.feuilleDeTempsService.getTimeSheet(consultantIdNumber, +year, +month).subscribe(
         (response: any) => {
         const statut = response.statut; 
         console.log('statut',response.statut)
@@ -60,27 +60,15 @@ export class VueGeneraleComponent implements OnInit {
           showButton: i <= currentMonth, 
           statut: statut
         });
-        
+        this.months.sort((a, b) => parseInt(a.date, 10) - parseInt(b.date, 10));
+
       },
       
-      error => {
-        console.error('Error fetching timesheet:', error);
-        this.months.push({
-          date: date,
-          showButton: i <= currentMonth,
-          statut: 'pending' 
-        });
-      }
-    ); 
+      
+    ) 
     }
   }
   
-  timesheetButton(){
-    this.timesheet.feuilleDeTempsService.getTimeSheet(this.consultantId,this.formattedMonth,this.formattedYear).subscribe((response:any)=>{
-      this.timesheet= response;
-
-    })
-  }
 
   goToTimesheet(month: string): void {
     const consultantId = localStorage.getItem('consultantId');
@@ -96,14 +84,17 @@ export class VueGeneraleComponent implements OnInit {
       console.error('Consultant ID is not available in local storage');
     }
   }
-  getButtonClass(statut: string): string {
+  getClockIconClass(statut: string): string {
     switch (statut) {
+      case 'pending':
+        return 'btn-yellow';
       case 'valider':
         return 'btn-green';
       case 'rejeter':
         return 'btn-red';
       default:
-        return 'btn-yellow'; 
-    }  }
+        return 'btn-gray'; // Fallback if no statut matches
+    }
+  }
 
-}
+} 

@@ -270,4 +270,23 @@ export class AdminTimesheetComponent implements OnInit {
       horizontalPosition: 'center'  
     });}
 
+    selectedFile : File | null= null;
+    onSelectedFile(event: any){
+      this.selectedFile = event.target.file[0];
+
+    }
+
+    createInvoice(orderId: number, productId: number, timesheetTotal: number){
+      if(this.selectedFile){
+        this.dolibarService.createInvoiceFile(orderId,productId,timesheetTotal,this.selectedFile).subscribe(
+          (response)=>{
+            console.log('file valid');
+          }
+        )
+
+      }else{
+        console.log("error fetching file");
+
+      }
+    }
 }

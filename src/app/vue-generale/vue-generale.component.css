@@ -41,27 +41,32 @@ table {
     font-size: 25px; 
   }
   button:disabled {
-    background-color: #66c57b;
+   
     cursor: not-allowed;
   }
   .btn-green {
-    background-color: green;
-    color: white;
+    color: green;
   }
   
   .btn-yellow {
-    background-color: yellow;
-    color: black;
+    color: yellow;
   }
   
   .btn-red {
-    background-color: red;
-    color: white;
+    color: red;
+  }
+  
+  .btn-gray {
+    color: gray;
+  }
+  .btn-default {
+    background-color: transparent;
+    border: none;
   }
   
   .fa-clock {
     margin-right: 5px;
-    color: #2ca348;
+    
   }
   
   

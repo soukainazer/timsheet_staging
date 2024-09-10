@@ -15,15 +15,17 @@
         
         <td>
           <button *ngIf="month.showButton"
-                  [ngClass]="getButtonClass(month.statut)"
+                  [ngClass]="getClockIconClass(month.statut)" 
+                  [disabled]="month.statut === 'valider'" 
                   (click)="goToTimesheet(month.date)">
-                  <i class="fa fa-clock"></i> 
+            <i class="fa fa-clock"></i> 
           </button>
           <!-- <button *ngIf="month.showButton"
-          [ngClass]="getButtonClass(month.statut)"
-          (click)="goToTimesheet(month.date)">
-    <i class="fa fa-clock"></i>
-  </button> -->
+                   class=" bnt-default"   
+                   (click)="goToTimesheet(month.date)">
+
+                  <i [ngClass]="getClockIconClass(month.statut)" class="fa fa-clock" ></i> 
+          </button> -->
         </td>
       </tr>
     </tbody>
