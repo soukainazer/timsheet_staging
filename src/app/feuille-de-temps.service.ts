@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { blob } from 'stream/consumers';
 
 
 export interface WorkedDays {
@@ -38,18 +39,23 @@ export class FeuilleDeTempsService {
   
   constructor(private http: HttpClient) { }
 
-  addBulkTimesheet(consultantId: number, year: number, month: number , workedDays : any[], base64File : string | null): Observable<void> {
+  addBulkTimesheet(consultantId: number, year: number, month: number , workedDays : any[],filesWithBcId:  { bcId: string, file: File }[]): Observable<void> {
     const formData = new FormData();
     formData.append('consultantId', consultantId.toString());
     formData.append('year', year.toString());
     formData.append('month', month.toString());
     formData.append('workedDaysJson', JSON.stringify(workedDays)); 
-    if (base64File) {
-      formData.append('pieceJointe', base64File);
-    }
+
+   filesWithBcId.forEach(({ bcId, file }) => {
+    formData.append(`pieceJointe_${bcId}`, file, file.name);
+    console.log(`Base64 File for BC ${bcId}:`, file, file.name);
+  });
+    
 
     return this.http.post<void>(`${this.apiUrl}/add`, formData);
   }
+
+ 
 
   updateTimesheet(consultantId: number, year: number, month: number, timesheet:any[]){
     return this.http.put<void>(`${this.apiUrl}/update`, timesheet);
@@ -73,8 +79,17 @@ export class FeuilleDeTempsService {
     return this.http.put<void>(`${this.apiUrl}/${id}/valider`, {statut: 'valider'});
   }
 
-  rejectTimesheet(id: number, reason: string): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}/rejeter`, {reason});
+  rejectTimesheet(timesheetId: number, reason: string): Observable<void> {
+    const notification = { message: reason };
+    return this.http.put<void>(`${this.apiUrl}/${timesheetId}/rejeter`, notification);
+}
+
+  getNotificationsForConsultant(consultantId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${consultantId}/notification`);
+  }
+
+  getNotificationsByTimesheetId(timesheetId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/notification/${timesheetId}`);
   }
 
 }

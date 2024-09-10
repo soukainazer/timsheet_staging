@@ -61,7 +61,7 @@ export class AdminTimesheetComponent implements OnInit {
 
   notifications: { [key: number]: string[] } = {};
   showRejectionModal = false;
-  selectedBonDeCommandeId: number | null = null;
+  selectedTimesheetId: number =0;
   rejectionReason = '';
 
   displayedColumns: string[] = ['order_id', 'order_ref', 'date_commande', 'total_ht', 'dates_worked']; // Define the columns
@@ -225,8 +225,8 @@ export class AdminTimesheetComponent implements OnInit {
    
   }
 
-  openRejectionModal(bonDeCommandeId: number) {
-    this.selectedBonDeCommandeId = bonDeCommandeId;
+  openRejectionModal(timesheetId: number) {
+    this.selectedTimesheetId = timesheetId;
     this.showRejectionModal = true;
   }
 
@@ -235,19 +235,19 @@ export class AdminTimesheetComponent implements OnInit {
     this.rejectionReason = '';
   }
 
-  rejectTimesheet(timesheetId: number, reason: string){
+  rejectTimesheet(timesheetId: number){
 
-    if (!reason) {
+    if (!this.rejectionReason) {
       alert('Please provide a reason for rejection.');
       return;
     }
 
   
 
-    this.feuilleDeTempsService.rejectTimesheet(timesheetId,reason).subscribe(
+    this.feuilleDeTempsService.rejectTimesheet(timesheetId ,this.rejectionReason).subscribe(
       response=> {
-        this.addNotification(timesheetId, 'Feuille De Temps rejetée: ${reason}');
-        this.closeRejectionModal();
+        console.log('Timesheet rejected successfully');
+      this.closeRejectionModal();
       },
       error => {
         console.error('Error rejecting the timesheet', error);
@@ -276,11 +276,17 @@ export class AdminTimesheetComponent implements OnInit {
 
     }
 
+   
+       fileName : string = 'document.pdf';
     createInvoice(orderId: number, productId: number, timesheetTotal: number){
-      if(this.selectedFile){
-        this.dolibarService.createInvoiceFile(orderId,productId,timesheetTotal,this.selectedFile).subscribe(
+      const timesheetId = this.timesheet.id;
+      if(this.timesheet.pieceJointe){
+       
+        this.dolibarService.createInvoiceFile(orderId,productId,timesheetTotal,this.timesheet.pieceJointe,this.fileName ).subscribe(
           (response)=>{
-            console.log('file valid');
+            this.showSuccessMessage('la Feuille de Temps a été Facturée avec Succès.');
+      console.log('Facture created' , response);
+       
           }
         )
 
@@ -288,5 +294,14 @@ export class AdminTimesheetComponent implements OnInit {
         console.log("error fetching file");
 
       }
+      this.feuilleDeTempsService.validateTimesheet(timesheetId).subscribe(
+        (response:any) => {
+          this.showSuccessMessage('Feuille de temps validée avec succès.');
+          this.timesheet.statut = 'valider';
+        },
+        (error: any) => {
+          console.error('Error validating the timesheet:', error)
+        }
+      )
     }
 }

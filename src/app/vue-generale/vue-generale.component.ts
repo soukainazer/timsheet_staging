@@ -9,7 +9,7 @@ import { response } from 'express';
   styleUrl: './vue-generale.component.css'
 })
 export class VueGeneraleComponent implements OnInit {
-  months: { date: string, showButton: boolean, statut: string}[] = [];
+  months: { date: string, showButton: boolean, statut: string }[] = [];
   currentYear: number = new Date().getFullYear();
   consultantId = localStorage.getItem('consultantId') ;
   timesheet:any;
@@ -38,36 +38,79 @@ export class VueGeneraleComponent implements OnInit {
     }
   }
 
- 
-
   generateMonths(consultantIdNumber: number): void {
-    const currentMonth = new Date().getMonth() + 1; 
+    const currentMonth = new Date().getMonth() + 1;
   
     this.months = [];
   
     for (let i = 1; i <= 12; i++) {
-      const month = i < 10 ? `0${i}` : `${i}`; 
+      const month = i < 10 ? `0${i}` : `${i}`;
       const date = `${month}`;
       const year = this.currentYear.toString();
-     
+  
       this.feuilleDeTempsService.getTimeSheet(consultantIdNumber, +year, +month).subscribe(
         (response: any) => {
-        const statut = response.statut; 
-        console.log('statut',response.statut)
+          const statuses = response.map((item: any) => item.statut); 
+  
+           let overallStatut = 'none'; 
 
-        this.months.push({
-          date: date,
-          showButton: i <= currentMonth, 
-          statut: statut
-        });
-        this.months.sort((a, b) => parseInt(a.date, 10) - parseInt(b.date, 10));
-
-      },
-      
-      
-    ) 
+          if (statuses.includes('rejeter')) {
+            overallStatut = 'rejeter';
+          } else if (statuses.includes('pending')) {
+            overallStatut = 'pending';
+          } else if (statuses.includes('valider')) {
+            overallStatut = 'valider';
+          }
+  
+          this.months.push({
+            date: date,
+            showButton: i <= currentMonth,
+            statut: overallStatut
+          });
+          
+         
+          this.months.sort((a, b) => parseInt(a.date, 10) - parseInt(b.date, 10));
+        },
+        (error: any) => {
+          console.error('Error fetching timesheets:', error);
+        }
+      );
     }
   }
+  
+
+ 
+
+  // generateMonths(consultantIdNumber: number): void {
+  //   const currentMonth = new Date().getMonth() + 1; 
+  
+  //   this.months = [];
+  
+  //   for (let i = 1; i <= 12; i++) {
+  //     const month = i < 10 ? `0${i}` : `${i}`; 
+  //     const date = `${month}`;
+  //     const year = this.currentYear.toString();
+     
+  //     this.feuilleDeTempsService.getTimeSheet(consultantIdNumber, +year, +month).subscribe(
+  //       (response: any) => {
+  //       const statut = response.statut; 
+  //       console.log('statut',response.statut)
+
+      
+
+  //       this.months.push({
+  //         date: date,
+  //         showButton: i <= currentMonth, 
+  //         statut: statut
+  //       });
+  //       this.months.sort((a, b) => parseInt(a.date, 10) - parseInt(b.date, 10));
+
+  //     },
+      
+      
+  //   ) 
+  //   }
+  // }
   
 
   goToTimesheet(month: string): void {
@@ -92,6 +135,7 @@ export class VueGeneraleComponent implements OnInit {
         return 'btn-green';
       case 'rejeter':
         return 'btn-red';
+        case 'none':
       default:
         return 'btn-gray'; // Fallback if no statut matches
     }

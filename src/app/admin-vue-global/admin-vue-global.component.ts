@@ -59,46 +59,94 @@ export class AdminVueGlobalComponent {
     this.loadTimesheets();
   }
 
-
   loadTimesheets(): void {
     this.feuilleDeTempsService.getAllTimesheets().subscribe(
       (data: any[]) => {
         console.log('Timesheets data:', data);
+        
         const filteredData = data.filter(timesheet => {
           const workedDaysArray = timesheet.jourtravaille && timesheet.jourtravaille[0]?.workedDays;
           console.log('workedDays:', workedDaysArray); 
           return workedDaysArray && workedDaysArray.length > 0;
-        });        
-        const consultantRequest = data.map(timesheet => 
+        });
+        
+        const consultantRequest = filteredData.map(timesheet =>
           this.userManagementService.getConsultantById(timesheet.consultantId)
         );
-
-        forkJoin(consultantRequest).subscribe(consultants =>{
-          const newTimesheets = filteredData.map((timesheet, index)=>({
-            ...timesheet,
-          
-            consultantName:` ${consultants[index]?.nom} ${consultants[index]?.prenom}`,
-            date: `${timesheet.year} / ${timesheet.month}`,
-            statut: `${timesheet.statut}`
-
-          })
-          
-          )
+  
+        forkJoin(consultantRequest).subscribe(consultants => {
+          const newTimesheets = filteredData.map((timesheet, index) => {
+            const consultant = consultants[index];
+            return {
+              ...timesheet,
+              consultantName: ` ${consultant?.nom} ${consultant?.prenom}`,
+              date: `${timesheet.year} / ${timesheet.month}`,
+              statut: `${timesheet.statut}`
+            };
+          });
+  
           this.timesheets = [...newTimesheets];
-
+  
           if (this.gridApi) {
             this.gridApi.setRowData(this.timesheets);
             this.gridApi.ensureIndexVisible(0); 
           }
         });
-        
-
       },
       (error) => {
         console.error('Error fetching timesheets', error);
       }
     );
   }
+  
+
+  // loadTimesheets(): void {
+  //   this.feuilleDeTempsService.getAllTimesheets().subscribe(
+  //     (data: any[]) => {
+  //       console.log('Timesheets data:', data);
+  //       const filteredData = data.filter(timesheet => {
+  //         const workedDaysArray = timesheet.jourtravaille && timesheet.jourtravaille[0]?.workedDays;
+  //         console.log('workedDays:', workedDaysArray); 
+  //         return workedDaysArray && workedDaysArray.length > 0;
+  //       });        
+  //       const consultantRequest = data.map(timesheet =>
+           
+  //         this.userManagementService.getConsultantById(timesheet.consultantId),
+           
+  //       )
+
+  //       forkJoin(consultantRequest).subscribe(consultants =>{
+
+  //         const newTimesheets = filteredData.map((timesheet, index)=>(
+  //           console.log('consultant name ',consultants[index].nom,consultants[index].prenom),
+  //           console.log('consultant name ',consultants[index].id, index),
+
+  //           {
+  //           ...timesheet,
+  //           consultantName:` ${consultants[index]?.nom} ${consultants[index]?.prenom}`,
+  //           date: `${timesheet.year} / ${timesheet.month}`,
+  //           statut: `${timesheet.statut}`
+
+  //         }
+        
+  //     )
+          
+  //         )
+  //         this.timesheets = [...newTimesheets];
+
+  //         if (this.gridApi) {
+  //           this.gridApi.setRowData(this.timesheets);
+  //           this.gridApi.ensureIndexVisible(0); 
+  //         }
+  //       });
+        
+
+  //     },
+  //     (error) => {
+  //       console.error('Error fetching timesheets', error);
+  //     }
+  //   );
+  // }
 
   onViewClick(id: number): void {
     this.ngZone.run(() => {

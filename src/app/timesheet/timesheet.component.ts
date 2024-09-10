@@ -1,6 +1,6 @@
  import {AfterViewInit,  Component, OnInit } from '@angular/core';
  import { ActivatedRoute, Router } from '@angular/router';
- import { ColDef, GridOptions ,GridApi , Column } from 'ag-grid-community';
+ import { ColDef,CellClassParams, GridOptions ,GridApi , Column } from 'ag-grid-community';
  import { FeuilleDeTempsService } from '../feuille-de-temps.service';
  import { isPlatformBrowser } from '@angular/common';
  import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
@@ -54,6 +54,7 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
   bonsDeCommande: BonDeCommande[] = [];
   selectedFile: File | null = null;
   base64File: string | null = null; 
+  notifications: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -96,23 +97,52 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
     
     this.route.paramMap.subscribe(params => {
       this.consultantId = params.get('consultantId');
+      const conId= params.get('consultantId') ? parseInt(params.get('consultantId')!, 10) : null;
       this.year = params.get('year') ? parseInt(params.get('year')!, 10) : null;
       this.month = params.get('month') ? parseInt(params.get('month')!, 10) : null;
+      const timesheetId = params.get('timesheetId');  
 
       if (this.consultantId && this.year && this.month) {
-        // this.getBonDeCommande();
-        // this.initializeGrid();
-
-        // this.loadFeuilleDeTemps();
-        this.initializeGrid();
-      
-        // this.loadFeuilleDeTempsData();
         
+        this.initializeGrid();
+        
+        this.feuilleDeTempsService.getTimeSheet(+this.consultantId, this.year, this.month).subscribe(
+          (timesheets: any[]) => {
+            const rejectedTimesheets = timesheets.filter(timesheet => timesheet.statut === 'rejeter');
+        
+            if (rejectedTimesheets.length > 0) {
+              const timesheetId = rejectedTimesheets[0].id;  
+              console.log('Rejected timesheet id:', timesheetId);
+              
+              if (timesheetId) {
+                this.feuilleDeTempsService.getNotificationsByTimesheetId(+timesheetId).subscribe(
+                  notifications => {
+                    console.log("timesheetId", timesheetId);
+                    this.notifications = notifications;
+                    console.log("notification", this.notifications);
+                  },
+                  error => {
+                    console.error('Error fetching notifications', error);
+                  }
+                );
+              } else {
+                console.log('Timesheet ID is null or undefined.');
+              }
+            } else {
+              console.log('No rejected timesheets found.');
+            }
+          },
+          error => {
+            console.error('Error fetching timesheets', error);
+          }
+        );
+        
+  
       } else {
         console.error('Missing route parameters');
       }
     });
-    // this.calculateTotalDays();
+    
   }
 
 
@@ -131,16 +161,68 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
         { headerName: 'Days Remaining', field: 'nombre_de_jour_restants' , pinned: 'left'},
        
         ...this.generateDayColumns(),
-        { headerName: 'Total', field: 'total', valueGetter: this.calculateRowTotal.bind(this) }
+        { headerName: 'Total', field: 'total', valueGetter: this.calculateRowTotal.bind(this) },
+        
+        {
+          headerName: 'Upload',
+          field: 'upload',
+          cellRenderer: (params: any) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
+        
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/pdf';
+            input.style.display = 'none'; 
+            input.className = 'upload-input'; 
+        
+            const button = document.createElement('button');
+            button.className = 'upload-button'; 
+            button.innerHTML = '+';
+
+            const fileNameDisplay = document.createElement('span');
+            fileNameDisplay.style.marginLeft = '10px';
+            fileNameDisplay.style.color = '#333'; // Dark text color
+            fileNameDisplay.style.fontSize = '14px';
+            fileNameDisplay.style.whiteSpace = 'nowrap';
+        
+            wrapper.appendChild(button);
+            wrapper.appendChild(fileNameDisplay);
+            wrapper.appendChild(input);
+        
+            button.addEventListener('click', () => {
+              input.click();
+            });
+        
+            input.addEventListener('change', (event: Event) => {
+              const fileInput = event.target as HTMLInputElement;
+              if (fileInput.files && fileInput.files.length > 0) {
+                // Show the name of the selected file
+                fileNameDisplay.textContent = fileInput.files[0].name;
+                // You can also handle the file upload here if needed
+                this.onFileChange(event, params.data['order_id']);
+              } else {
+                fileNameDisplay.textContent = 'No file chosen'; // Optional: Message when no file is selected
+              }
+            });
+                
+            return wrapper;
+          },
+          pinned: 'left',
+          maxWidth: 150
+        }
+        
       ];
-      console.log('before load')
       this.getBonDeCommande();
-      //  this.loadFeuilleDeTemps();
+      
       
        
       
     }
   }
+
+  
  
 
 
@@ -185,17 +267,6 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
   }
 
 
-  // updateGridWithBCs(): void {
-  //   this.rowData = this.bonsDeCommande.map(bc => ({
-  //     ...bc,
-  //     ...this.createEmptyRowData()
-  //   }));
-    
-  //   if (this.gridApi) {
-  //     this.gridApi.applyTransaction({ add: this.rowData });
-  //     this.calculateTotalDays(); 
-  //   }
-  // }
 
   createDaysColumnsData(): any {
     const daysInMonth = new Date(this.year!, this.month!, 0).getDate();
@@ -235,11 +306,16 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(this.year!,this.month! - 1, i);
       const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
-      // console.log(`Day ${i}: ${dayName}`);
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6; // 0 = Sunday, 6 = Saturday
+
+
       columns.push({
         headerName: `${dayName} ${i}`,
         field: `day${i}`,
-        editable: true,
+        editable:  !isWeekend,
+        cellClassRules: {
+          'weekend-cell': (params: CellClassParams<any, any>) => isWeekend 
+        },
         cellEditor: 'agNumericCellEditor',
         valueSetter: (params)=> {
           if (!params.colDef || !params.colDef.field) {
@@ -287,20 +363,25 @@ export class TimesheetComponent implements OnInit,AfterViewInit{
   }
       
 
-  
 
 
-onFileChange(event: any): void {
-  this.selectedFile = event.target.files[0];
-  const reader = new FileReader();
 
-  reader.onloadend= () => {
-    this.base64File = reader.result as string;
+onFileChange(event: Event, orderId: string): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  console.log('onFileChange called with rowIndex:', orderId);
+
+  if (file) {
+    // Find the row by rowIndex
+    const row = this.rowData.find(r => r['order_id'] === orderId);
     
-    console.log('base64 string:',this.base64File)
-  };
-  if (this.selectedFile){
-    reader.readAsDataURL(this.selectedFile);
+
+    if (row) {
+      row['file'] = file; // Store the file in the row data
+      console.log(`File successfully added for order_id: ${orderId}`);
+    } else {
+      console.error(`Row with order_id ${orderId} does not exist.`);
+    }
   }
 }
 
@@ -319,15 +400,29 @@ onSubmitTimesheet(): void {
       console.error('Worked days cannot be empty.');
       return;
     }
-    
-    this.feuilleDeTempsService.addBulkTimesheet(+this.consultantId, +year, +month, workedDays,this.base64File)
+
+    const filesWithBcId = this.rowData.map((row, index) => {
+      const bcId = row['order_id'];
+      const file = row['file'] as File;
+      if (file) {
+        return { bcId, file };
+      }
+      return null;
+    }).filter(item => item !== null) as { bcId: string, file: File }[];
+
+    console.log('filesWithBcId', filesWithBcId);
+
+    this.feuilleDeTempsService.addBulkTimesheet(+this.consultantId, +year, +month, workedDays,filesWithBcId)
       .subscribe(() => {
-        console.log('Timesheet successfully updated.');
+
+        this.snackBar.open('Timesheet submitted successfully!', 'Close', { duration: 3000 });
         this.showSuccessMessage('La Feuille de Temps successfully updated.')
-        console.log('File' , this.selectedFile);
         this.router.navigate(['vue-globale']);
+
       }, error => {
         console.error('Error updating timesheet:', error);
+        this.snackBar.open('Missing required data!', 'Close', { duration: 3000 });
+
       });
   } else {
     console.error('Consultant ID, year, or month is not available.');
@@ -363,80 +458,50 @@ extractWorkedDays(): any[] {
 
 
 
-  // loadFeuilleDeTemps(): void {
+loadFeuilleDeTemps(): void {
+ 
+  if (this.consultantId && this.year && this.month) {
     
-  //   if (this.consultantId && this.year !== null && this.month !== null) {
-  //     this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month).subscribe(
-  //       data => {
-  //         console.log('Loaded timesheet data:', data);
-  //         // this.initializeGrid();
-  //         // this.getBonDeCommande();
-  //         if (data.bonsDeCommande) {
-  //           this.bonsDeCommande = data.bonsDeCommande;
-  //           this.rowData = data.bonsDeCommande.map((bc:any) => ({
-  //             bcId: bc.order_ref ,
-  //             ...this.createEmptyRowData() 
-  //           }));
-  //           this.gridApi.applyTransaction({ add: this.rowData });
+    this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month)
+      .subscribe(
+        (response: any[]) => {
+          this.rowData = this.bonsDeCommande.map(bc => ({
+            ...bc,
+            ...this.createDaysColumnsData()  
+          }));
 
-  //         } else {
-  //           console.warn('bonsDeCommande property is missing in the response');
-  //         }
-  //         this.totalDaysWorked = data.totalJoursT || 0;
-  //         this.bonsDeCommande = data.bonsDeCommande || [];
-  //       },
-  //       error => {
-  //         console.error('Error loading timesheet:', error);
-  //       }
-  //     );
-  //   }
-  // }
-
-  loadFeuilleDeTemps(): void {
-    if (this.consultantId && this.year && this.month) {
-      this.feuilleDeTempsService.getTimeSheet(+this.consultantId, +this.year, +this.month)
-        .subscribe(
-          (response: any) => {
-            console.log('timesheet',response);
-            this.rowData = this.bonsDeCommande.map(bc => ({
-              ...bc,
-              ...this.createDaysColumnsData()  
-            }));
-            if (response.jourtravaille && response.jourtravaille.length > 0) {
-            response.jourtravaille.forEach((workedDayEntry:any) => {
-              workedDayEntry.workedDays.forEach((workedDay:any) => {
-
+          response.forEach((timesheet: any) => {
+            timesheet.jourtravaille.forEach((jourtravaille: any) => {
+              jourtravaille.workedDays.forEach((workedDay: any) => {
                 const bcId = workedDay.bonDeCommandeId;
                 const date = new Date(workedDay.date);
                 const dayNumber = date.getDate();
                 const duration = workedDay.duration;
-                
-                console.log('rowdata',this.rowData);
-                const matchingRow = this.rowData.find(row => row.order_id === bcId.toString(),);
-                
-                
-  
-          
-            if (matchingRow) {
-              matchingRow[`day${dayNumber}`] = duration;
-            }
-          });
-        });
-      }
-  
-            if (this.gridApi) {
-              this.gridApi.applyTransaction({ add: this.rowData });  
-            }
-            this.calculateTotalDays();
-          },
-          error => {
-            this.errorHandler.handleError(error);
-          }
-        );
-    }
-  }
-  
 
+                const row = this.rowData.find(r => +r.order_id === bcId);
+
+
+                if (row) {
+                  // Update the row with worked day data
+                  row[`day${dayNumber}`] = (row[`day${dayNumber}`] || 0) + duration;
+                }
+              });
+            });
+          });
+
+         
+
+          // Apply the updated data to the grid
+          if (this.gridApi) {
+            this.gridApi.applyTransaction({ add: this.rowData });           }
+          this.calculateTotalDays();
+        },
+        error => {
+          this.errorHandler.handleError(error);
+        }
+      );
+  }
+}
 
 
 
@@ -471,6 +536,9 @@ extractWorkedDays(): any[] {
       verticalPosition: 'top',  
       horizontalPosition: 'center'  
     });}
+
+
+
   
 }
 

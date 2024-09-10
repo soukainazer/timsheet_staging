@@ -1,73 +1,43 @@
-
-
-    <nav class="sidebar close">
-        <header>
-            <div class="image-text">
-                <span class="image">
-                    <!--<img src="logo.png" alt="">-->
-                </span>
-
-                <div class="text logo-text">
-                    <span class="name">{{ userRole === 'ADMIN' ? 'Admin' : 'Consultant' }}</span>
-                    <span class="profession">{{UserEmail}}</span>
-                </div>
-            </div>
-
-            
-        </header>
-
-        <div class="menu-bar">
-            <div class="menu">
-
-                <li class="search-box">
-                    <i class='bx bx-search icon'></i>
-                    <input type="text" placeholder="Search...">
-                </li>
-
-                <ul class="menu-links">
-                    <li class="nav-link">
-                        <a [routerLink]="globalLink">
-                            <i class='bx bx-home-alt icon' ></i>
-                            <span class="text nav-text">Vue Globale</span>
-                        </a>
-                    </li>
-                        <li *ngIf="userRole === 'ADMIN'">
-                        <a [routerLink]="'/consultant'">
-                            <span class="icon"><i class="fas fa-tachometer-alt"></i></span>
-                            <span class="text">Dashboard</span>
-                        </a>
-                        </li>
-
-                    
-
-                    <li class="nav-link">
-                        <a href="#">
-                            <i class='bx bx-bell icon'></i>
-                            <span class="text nav-text">Notifications</span>
-                        </a>
-                    </li>
-
-                    
-
-
-                </ul>
-            </div>
-
-            <div class="bottom-content">
-                <li class="">
-                    <a (click)="logout()">
-                        <i class='bx bx-log-out icon' ></i>
-                        <span class="text nav-text">Logout</span>
-                    </a>
-                </li>
-
-            
+<nav class="sidebar">
+    <header>
+        <div class="image-text">
+            <span class="image">
+                <!-- <img src="logo.png" alt=""> -->
+            </span>
+            <div class="text logo-text">
+                <span class="name">{{ userRole === 'ADMIN' ? 'Admin' : 'Consultant' }}</span>
+                <span class="profession">{{ UserEmail }}</span>
             </div>
         </div>
+    </header>
 
-    </nav>
+    <div class="menu-bar">
+        <div class="menu">
+            <ul class="menu-links">
+                <li class="nav-link">
+                    <a [routerLink]="globalLink">
+                        <i class='bx bx-home-alt icon'></i>
+                        <span class="text nav-text">Vue Globale</span>
+                    </a>
+                </li>
+                <li *ngIf="userRole === 'ADMIN'">
+                    <a [routerLink]="'/consultant'">
+                        <span class="icon">
+                            <i class="fas fa-tachometer-alt"></i></span>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
 
-  
-    
-
-
+        <div class="bottom-content">
+            <li class="">
+                <a (click)="logout()">
+                    <i class='bx bx-log-out icon'></i>
+                    <span class="text nav-text">Logout</span>
+                </a>
+            </li>
+        </div>
+    </div>
+</nav>

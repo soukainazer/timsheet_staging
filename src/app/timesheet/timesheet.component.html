@@ -1,11 +1,15 @@
 
  
  <div class="timesheet-container ag-theme-alpine">
-  <div class="timesheet-header">
-    <div class="file-upload-container">
-      <label for="formFile" class="file-label">Choisissez un fichier </label>
-      <input class="file-input" type="file" id="formFile" (change)="onFileChange($event)">
+
+  <div *ngIf="notifications && notifications.length > 0" class="notification-container">
+    <div *ngFor="let notification of notifications" class="notification-item">
+      {{ notification.message }}
     </div>
+  </div>
+
+  <div class="timesheet-header">
+    
   
   <button (click)="onAddBonDeCommande()">Ajouter un Bon de Commande</button>
   </div>
